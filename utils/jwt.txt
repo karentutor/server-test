@@ -1,0 +1,12 @@
+// utils/jwt.js
+import jwt from "jsonwebtoken";
+
+export function signReferralToken(payload) {
+  // Typically you want a short expiry for referral tokens, but this is up to you
+  // e.g. "30d" for 30 days. Use your .env SECRET
+  return jwt.sign(payload, process.env.REFERRAL_JWT_SECRET, { expiresIn: "30d" });
+}
+
+export function verifyReferralToken(token) {
+  return jwt.verify(token, process.env.REFERRAL_JWT_SECRET);
+}

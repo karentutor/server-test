@@ -1,0 +1,26 @@
+pm2 start npm --name "server" -- run start
+
+4) Overview of the Request Flow
+
+    Front End calls POST /users/follow/:userId.
+    userController.js => followUser calls followUserService(loggedInUserId, userId).
+    userService.js =>
+        Finds both users, updates following/followers.
+        Saves them.
+        Calls notifyUserFollowed(...).
+    socket.js => If followedUserId is connected, emits "userFollowed" with the payload.
+    Client (if you have a hook or a provider listening for "userFollowed" events) sees it and can do something (e.g. show a toast).
+
+5) Why This Approach?
+
+    Separation of Concerns: The “controller” is minimal, focusing on HTTP request/response. The “service” handles business logic + real-time updates.
+    Easier to Test: You can test followUserService separately from the controller.
+    Maintainability: If you have other back-end places that cause a follow (maybe an admin feature?), you can call the same followUserService function to keep logic consistent.
+
+6) That’s It!
+
+You’ve now moved the Socket.io follow notification out of the controller into a backend (domain) function, while still keeping everything server-side. The final code flow is:
+
+    Client => calls Controller => calls Service => calls Socket => Emit event to the followed user.
+
+No more direct notifyUserFollowed in the controller. That’s how you keep your controller super clean while still doing it “in the backend.”
